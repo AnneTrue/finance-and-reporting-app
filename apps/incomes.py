@@ -9,5 +9,5 @@ import apps
 
 LAYOUT = html.Div([
     apps.NAVBAR,
-    html.H3('PLACEHOLDER'),
+    html.H3('INCOMES PAGE'),
 ])

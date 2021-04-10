@@ -7,7 +7,11 @@ import dash_html_components as html
 import apps
 
 
-LAYOUT = html.Div([
-    apps.NAVBAR,
-    html.H3('PLACEHOLDER'),
-])
+def get_layout():
+    return html.Div([
+        apps.NAVBAR,
+        html.H3('EXPENSES PAGE'),
+    ])
+
+
+LAYOUT = get_layout()

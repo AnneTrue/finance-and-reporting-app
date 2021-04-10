@@ -9,5 +9,8 @@ import apps
 
 LAYOUT = html.Div([
     apps.NAVBAR,
-    html.H3('PLACEHOLDER'),
+    html.H3('REPORT MONTHLY PAGE'),
 ])
+
+ANNUAL_LAYOUT = LAYOUT
+MONTHLY_LAYOUT = LAYOUT
