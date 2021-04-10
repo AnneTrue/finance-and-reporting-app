@@ -4,6 +4,8 @@ RUN apt update \
     && apt install --assume-yes python3-dev python3-pip
 
 RUN useradd --create-home farapp
+RUN mkdir /data/ \
+    && chown farapp:farapp /data/
 WORKDIR /home/farapp
 USER farapp
 
