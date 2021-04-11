@@ -21,7 +21,7 @@ import far_core.db
 
 
 # How many lines of input to accept at a time
-NUMBER_OF_INPUT_ROWS = 2
+NUMBER_OF_INPUT_ROWS = 12
 
 
 class InputType(enum.Enum):
