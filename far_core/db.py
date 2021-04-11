@@ -21,6 +21,12 @@ class ExpenseRecord(db.Model):
     account = db.Column(db.Enum(far_core.Accounts), nullable=False)
     note = db.Column(db.String(length=1024), nullable=True)
 
+    def __str__(self):
+        return (
+            f"<ExpenseRecord {self.account} {self.date}"
+            f" {self.amount} {self.category}>"
+        )
+
 
 class IncomeRecord(db.Model):
     """
@@ -33,6 +39,12 @@ class IncomeRecord(db.Model):
     category = db.Column(db.Enum(far_core.IncomeCategory), nullable=False)
     account = db.Column(db.Enum(far_core.Accounts), nullable=False)
     note = db.Column(db.String(length=1024), nullable=True)
+
+    def __str__(self):
+        return (
+            f"<IncomeRecord {self.account} {self.date}"
+            f" {self.amount} {self.category}>"
+        )
 
 
 def init_tables():
