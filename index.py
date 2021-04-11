@@ -43,7 +43,12 @@ def display_page(pathname):
         return apps.report.MONTHLY_LAYOUT
     else:
         return [
-            html.Div([html.H3("The page you're looking for does not exist"),dcc.Link('Go to App 2', href='/apps/app2')])
+            html.Div(
+                [
+                    html.H3("The page you're looking for does not exist"),
+                    dcc.Link('Back to the main page', href='/')
+                ]
+            ),
         ]
 
 
