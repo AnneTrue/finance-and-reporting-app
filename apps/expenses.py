@@ -13,7 +13,14 @@ import apps
 def get_layout():
     return html.Div([
         apps.NAVBAR,
-        html.Div(id="expense_table_div"),
+        dbc.Row(
+            [
+                dbc.Col(
+                    [html.Div("Loading...", id="expense_table_div")],
+                    width=10
+                )
+            ],
+            justify="center")
     ])
 
 
@@ -38,8 +45,7 @@ def load_expenses(pathname):
         ],
         data=df.to_dict("records"),
         filter_action="native",
-        sort_action="native"
+        sort_action="native",
+        fixed_rows={"headers": True, "data": 0},
     )
-    return dbc.Row([
-        dbc.Col([dtable], width=10)
-    ], justify="center")
+    return dtable
