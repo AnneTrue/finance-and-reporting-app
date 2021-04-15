@@ -6,6 +6,7 @@ and the database.
 
 import dash.dependencies
 import dash_bootstrap_components as dbc
+import flask_caching
 import flask_sqlalchemy
 
 
@@ -19,3 +20,8 @@ app = dash.Dash(
 server = app.server
 server.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///test.db"  # TODO /data
 db = flask_sqlalchemy.SQLAlchemy(server)
+cache = flask_caching.Cache()
+cache.init_app(
+    server,
+    config={"CACHE_TYPE": "filesystem", "CACHE_DIR": "/tmp/far_app_cache"},
+)
