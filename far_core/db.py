@@ -14,6 +14,8 @@ class ExpenseRecord(db.Model):
     Represents a single expense transaction:
     Account, date, monetary amount, category, notes
     """
+    __tablename__ = "expense_record"
+
     expense_id = db.Column(db.Integer, primary_key=True, nullable=False)
     date = db.Column(db.Date, nullable=False)
     amount = db.Column(db.Numeric, nullable=False)
@@ -27,12 +29,18 @@ class ExpenseRecord(db.Model):
             f" {self.amount} {self.category}>"
         )
 
+    @property
+    def pandas_record(self):
+        return self.date, self.amount, self.category, self.account, self.note
+
 
 class IncomeRecord(db.Model):
     """
     Represents a single income transaction:
     Account, date, monetary amount, category, notes
     """
+    __tablename__ = "income_record"
+
     income_id = db.Column(db.Integer, primary_key=True, nullable=False)
     date = db.Column(db.Date, nullable=False)
     amount = db.Column(db.Numeric, nullable=False)
@@ -45,6 +53,10 @@ class IncomeRecord(db.Model):
             f"<IncomeRecord {self.account} {self.date}"
             f" {self.amount} {self.category}>"
         )
+
+    @property
+    def pandas_record(self):
+        return self.date, self.amount, self.category, self.account, self.note
 
 
 def init_tables():

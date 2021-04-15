@@ -5,11 +5,12 @@ e.g. configuration data, utility functions unrelated to the web apps.
 """
 
 import datetime
+import dateutil.relativedelta
 import enum
 
 
 @enum.unique
-class Accounts(enum.Enum):
+class Accounts(str, enum.Enum):
     """
     An enumeration of accounts, which you should edit as an end-user
     """
@@ -24,7 +25,7 @@ class Accounts(enum.Enum):
 
 
 @enum.unique
-class ReducedCategory(enum.Enum):
+class ReducedCategory(str, enum.Enum):
     asset = "Asset"
     debt = "Debt"
     fun = "Fun"
@@ -36,7 +37,7 @@ class ReducedCategory(enum.Enum):
 
 
 @enum.unique
-class ExpenseCategory(enum.Enum):
+class ExpenseCategory(str, enum.Enum):
     """
     An enumeration for expenses.
     You can call str() on an ExpenseCategory enum to get its display name.
@@ -112,8 +113,17 @@ class ExpenseCategory(enum.Enum):
             )
 
 
+EXPENSE_CATEGORY_BY_REDUCED_CATEGORY = {
+    red_cat: set() for red_cat in ReducedCategory
+}
+for red_cat in ReducedCategory:
+    for cat in ExpenseCategory:
+        if cat.reduced_category is red_cat:
+            EXPENSE_CATEGORY_BY_REDUCED_CATEGORY[red_cat].add(cat)
+
+
 @enum.unique
-class IncomeCategory(enum.Enum):
+class IncomeCategory(str, enum.Enum):
     """
     An enumeration for incomes.
     You can call str() on an IncomeCategory to get its display name.
@@ -132,10 +142,7 @@ class IncomeCategory(enum.Enum):
 def date_from_string(date_str: str) -> datetime.date:
     """
     Accepts either ISO with hyphens dates such as "2021-01-30" or US-style
-    dates with slashes such as "1/30/2021
-
-    :param date_str:
-    :return:
+    dates with slashes such as "1/30/2021"
     """
     for fmt in ("%Y-%m-%d", "%m/%d/%Y"):
         try:
@@ -145,3 +152,25 @@ def date_from_string(date_str: str) -> datetime.date:
         else:
             return dt_obj.date()
     raise ValueError(f"Unrecognised date string: '{date_str}'")
+
+
+def month_from_string(month_str: str) -> datetime.date:
+    """
+    Accepts year-month strings with hyphens such as "%Y-%m"
+    """
+    return datetime.datetime.strptime(month_str, "%Y-%m").date()
+
+
+def get_current_month() -> datetime.date:
+    now = datetime.datetime.now()
+    return datetime.date(year=now.year, month=now.month, day=1)
+
+
+def month_delta(start_month: datetime.date, months: int) -> datetime.date:
+    return start_month + dateutil.relativedelta.relativedelta(months=months)
+
+
+def usd_str(amount: float) -> str:
+    if amount < 0:
+        return f"(${amount:,.2f})"
+    return f"${amount:,.2f}"

@@ -8,6 +8,8 @@ dash = "*"
 pandas = "*"
 dash-bootstrap-components = "*"
 flask-sqlalchemy = "*"
+flask-caching = "*"
+python-dateutil = "*"
 
 [dev-packages]
 

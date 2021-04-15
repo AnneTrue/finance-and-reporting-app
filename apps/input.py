@@ -39,7 +39,7 @@ def get_layout():
             "Input validation error! Please check your inputs for mistakes",
             id="input_alert_auto",
             is_open=False,
-            duration=4000,
+            duration=4000,  # TODO: increase this and add error message
         ),
         dbc.Row(
             [
