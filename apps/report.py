@@ -8,7 +8,6 @@ from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
-import dash_table
 
 from app import app
 import apps
@@ -147,8 +146,14 @@ def categorical_review_table_annual(date_str: str):
             html.Tr([html.Th("Categorical Expense Review: Annual", colSpan=4)]),
             html.Tr([
                 html.Th("Category"),
-                html.Th(far_core.month_delta(end_date, -13).strftime("%Y-%m")),
-                html.Th(far_core.month_delta(end_date, -1).strftime("%Y-%m")),
+                html.Th(
+                    "Year ending on {}".format(
+                        far_core.month_delta(end_date, -12).strftime("%Y-%m")
+                    )
+                ),
+                html.Th(
+                    "Year ending on {}".format(end_date.strftime("%Y-%m"))
+                ),
             ]),
         ]),
     ]
