@@ -181,7 +181,7 @@ def categorical_review_table_annual(date_str: str):
         ]),
     ]
     category_counters = []
-    for month_delta in range(-13, 0, 12):
+    for month_delta in range(-25, -12, 12):
         month_slice_start = far_core.month_delta(end_date, month_delta)
         month_slice_end = far_core.month_delta(end_date, month_delta + 12)
         exp_records = apps.get_filtered_expense_records(
@@ -234,7 +234,7 @@ def cash_flow_review_graph_monthly(date_str: str):
         )
         month_income = 0.0
         for inc_record in inc_records:
-            month_income += inc_record.amount
+            month_income += float(inc_record.amount)
         incomes.append(month_income)
     df = pd.DataFrame(index=months)
     colours = []
@@ -285,7 +285,7 @@ def cash_flow_review_graph_annual(date_str: str):
         )
         month_income = 0.0
         for inc_record in inc_records:
-            month_income += inc_record.amount
+            month_income += float(inc_record.amount)
         incomes.append(month_income)
     df = pd.DataFrame(index=months)
     colours = []
