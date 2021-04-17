@@ -81,7 +81,7 @@ def get_date_from_date_str(date_str: str) -> datetime.date:
     return datetime.date(year, month, 1)
 
 
-def get_categorical_review_table_counter(exp_records: list) -> collections.Counter:
+def get_category_counter(exp_records: list) -> collections.Counter:
     counter = collections.Counter()
     for record in exp_records:
         counter[record.category] += record.amount
@@ -132,7 +132,7 @@ def categorical_review_table_monthly(date_str: str):
             end_date=month_slice_end, start_date=month_slice_start
         )
         category_counters.append(
-            get_categorical_review_table_counter(exp_records)
+            get_category_counter(exp_records)
         )
     category_rows = get_categorical_review_table_rows(category_counters)
     header_row.append(html.Tbody(category_rows))
@@ -171,14 +171,14 @@ def categorical_review_table_annual(date_str: str):
             end_date=month_slice_end, start_date=month_slice_start
         )
         category_counters.append(
-            get_categorical_review_table_counter(exp_records)
+            get_category_counter(exp_records)
         )
     category_rows = get_categorical_review_table_rows(category_counters)
     header_row.append(html.Tbody(category_rows))
     return header_row
 
 
-def get_cash_flow_review_graph_counter(
+def get_reduced_category_counter(
         exp_records: list
 ) -> collections.Counter:
     """
@@ -201,6 +201,7 @@ def cash_flow_review_graph_monthly(date_str: str):
         return None
     months = []
     reduced_category_counters = []
+    incomes = []
     for month_delta in range(-13, 0):
         month_slice_start = far_core.month_delta(end_date, month_delta)
         month_slice_end = far_core.month_delta(end_date, month_delta + 1)
@@ -209,8 +210,15 @@ def cash_flow_review_graph_monthly(date_str: str):
             end_date=month_slice_end, start_date=month_slice_start
         )
         reduced_category_counters.append(
-            get_cash_flow_review_graph_counter(exp_records)
+            get_reduced_category_counter(exp_records)
         )
+        inc_records = apps.get_filtered_income_records(
+            end_date=month_slice_end, start_date=month_slice_start
+        )
+        month_income = 0.0
+        for inc_record in inc_records:
+            month_income += inc_record.amount
+        incomes.append(month_income)
     df = pd.DataFrame(index=months)
     colours = []
     for red_cat in far_core.ReducedCategory:
@@ -218,6 +226,8 @@ def cash_flow_review_graph_monthly(date_str: str):
             float(cntr[red_cat]) for cntr in reduced_category_counters
         ]
         colours.append(red_cat.colour)
+    df["Income"] = incomes
+    colours.append("black")
     return px.line(
         df,
         x=df.index,
@@ -242,6 +252,7 @@ def cash_flow_review_graph_annual(date_str: str):
         return None
     months = []
     reduced_category_counters = []
+    incomes = []
     for month_delta in range((-12 * 3) - 1, 0):  # Three years
         month_slice_start = far_core.month_delta(end_date, month_delta)
         month_slice_end = far_core.month_delta(end_date, month_delta + 1)
@@ -250,8 +261,15 @@ def cash_flow_review_graph_annual(date_str: str):
             end_date=month_slice_end, start_date=month_slice_start
         )
         reduced_category_counters.append(
-            get_cash_flow_review_graph_counter(exp_records)
+            get_reduced_category_counter(exp_records)
         )
+        inc_records = apps.get_filtered_income_records(
+            end_date=month_slice_end, start_date=month_slice_start
+        )
+        month_income = 0.0
+        for inc_record in inc_records:
+            month_income += inc_record.amount
+        incomes.append(month_income)
     df = pd.DataFrame(index=months)
     colours = []
     for red_cat in far_core.ReducedCategory:
@@ -259,6 +277,8 @@ def cash_flow_review_graph_annual(date_str: str):
             float(cntr[red_cat]) for cntr in reduced_category_counters
         ]
         colours.append(red_cat.colour)
+    df["Income"] = incomes
+    colours.append("black")
     return px.line(
         df,
         x=df.index,
