@@ -1,4 +1,4 @@
-version: '3.3'
+version: '3.7'
 
 services:
   farapp:
@@ -7,3 +7,16 @@ services:
       context: ./
     ports:
       - 8080:8080
+    restart: 'always'
+    networks:
+      - 'far_app'
+    volumes:
+      - type: bind
+        source: './data/'
+        target: '/data/'
+networks:
+  far_app:
+    name: 'far_app'
+volumes:
+  data:
+    driver: local

@@ -15,6 +15,7 @@ RUN pip3 install -r requirements.txt
 COPY app.py ./
 COPY index.py ./
 COPY apps/ ./apps/
+COPY far_core/ ./far_core/
 
 EXPOSE 8080/tcp
 

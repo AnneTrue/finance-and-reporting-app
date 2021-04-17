@@ -18,7 +18,7 @@ app = dash.Dash(
     suppress_callback_exceptions=True,
 )
 server = app.server
-server.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///test.db"  # TODO /data
+server.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////data/far_app_data.db"
 db = flask_sqlalchemy.SQLAlchemy(server)
 cache = flask_caching.Cache()
 cache.init_app(
