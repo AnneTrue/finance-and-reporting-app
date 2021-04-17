@@ -55,6 +55,12 @@ def get_layout(report_type: str):
             bordered=True, responsive=True, striped=True,
         )
     )
+
+    # Discretionary Spending Review Graph
+    children.append(dcc.Graph(
+        id=f"discretionary_spending_review_graph_{report_type}"
+    ))
+    children.append(html.Hr())
     return html.Div(
         [
             apps.NAVBAR,
@@ -306,5 +312,91 @@ def cash_flow_review_graph_annual(date_str: str):
             "index": "Month",
             "value": "Spending (USD)",
             "variable": "Category"
+        },
+    )
+
+
+@app.callback(
+    Output("discretionary_spending_review_graph_monthly", "figure"),
+    Input("report_date_picker_monthly", "value"),
+)
+def discretionary_spending_review_graph_monthly(date_str: str):
+    end_date = get_date_from_date_str(date_str)
+    if not end_date:
+        return None
+    months = []
+    account_counters = []
+    for month_delta in range(-13, 0):
+        month_slice_start = far_core.month_delta(end_date, month_delta)
+        month_slice_end = far_core.month_delta(end_date, month_delta + 1)
+        months.append(month_slice_start)
+        exp_records = apps.get_filtered_expense_records(
+            end_date=month_slice_end, start_date=month_slice_start
+        )
+        account_counter = collections.Counter()
+        for exp_record in exp_records:
+            if exp_record.category.reduced_category is far_core.ReducedCategory.fun:
+                account_counter[exp_record.account] += exp_record.amount
+        account_counters.append(account_counter)
+    df = pd.DataFrame(index=months)
+    colours = []
+    for account in far_core.Accounts:
+        df[str(account)] = [
+            float(cntr[account]) for cntr in account_counters
+        ]
+        colours.append(account.colour)
+    return px.line(
+        df,
+        x=df.index,
+        y=df.columns,
+        title="Discretionary Spending Review",
+        color_discrete_sequence=colours,
+        labels={
+            "index": "Month",
+            "value": "Spending (USD)",
+            "variable": "Account"
+        },
+    )
+
+
+@app.callback(
+    Output("discretionary_spending_review_graph_annual", "figure"),
+    Input("report_date_picker_annual", "value"),
+)
+def discretionary_spending_review_graph_annual(date_str: str):
+    end_date = get_date_from_date_str(date_str)
+    if not end_date:
+        return None
+    months = []
+    account_counters = []
+    for month_delta in range(-(12 * 3) - 1 , 0):
+        month_slice_start = far_core.month_delta(end_date, month_delta)
+        month_slice_end = far_core.month_delta(end_date, month_delta + 1)
+        months.append(month_slice_start)
+        exp_records = apps.get_filtered_expense_records(
+            end_date=month_slice_end, start_date=month_slice_start
+        )
+        account_counter = collections.Counter()
+        for exp_record in exp_records:
+            if exp_record.category.reduced_category is far_core.ReducedCategory.fun:
+                account_counter[exp_record.account] += exp_record.amount
+        account_counters.append(account_counter)
+    df = pd.DataFrame(index=months)
+    colours = []
+    for account in far_core.Accounts:
+        df[str(account)] = [
+            float(cntr[account]) for cntr in account_counters
+        ]
+        colours.append(account.colour)
+    return px.line(
+        df,
+        x=df.index,
+        y=df.columns,
+        title="Discretionary Spending Review",
+        color_discrete_sequence=colours,
+        labels={
+            "index": "Month",
+            "value": "Spending (USD)",
+            "variable": "Account"
         },
     )

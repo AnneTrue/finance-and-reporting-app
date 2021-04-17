@@ -23,6 +23,14 @@ class Accounts(str, enum.Enum):
     def __str__(self):
         return self.value
 
+    @property
+    def colour(self):
+        return {
+            self.anne: "red",
+            self.john: "green",
+            self.joint: "blue",
+        }[self]
+
 
 @enum.unique
 class ReducedCategory(str, enum.Enum):
