@@ -8,6 +8,8 @@ from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
+import pandas as pd
+import plotly.express as px
 
 from app import app
 import apps
@@ -23,7 +25,7 @@ def get_layout(report_type: str):
         html.Div(
             children=[
                 html.Label(
-                    children="Choose month to end report on:",
+                    children=f"Choose month to end {report_type} report on:",
                     className="col-form-label",
                     htmlFor=f"report_date_picker_{report_type}",
                 ),
@@ -40,6 +42,10 @@ def get_layout(report_type: str):
             className="form-group",
         )
     )
+    children.append(html.Hr())
+
+    # Cash-flow Review Graph
+    children.append(dcc.Graph(id=f"cash_flow_review_graph_{report_type}"))
     children.append(html.Hr())
 
     # Categorical Expense Breakdown
@@ -170,3 +176,98 @@ def categorical_review_table_annual(date_str: str):
     category_rows = get_categorical_review_table_rows(category_counters)
     header_row.append(html.Tbody(category_rows))
     return header_row
+
+
+def get_cash_flow_review_graph_counter(
+        exp_records: list
+) -> collections.Counter:
+    """
+    :return: a collections.Counter with keys of far_core.ReducedCategory and
+        value of the sum of expenses in that reduced category from exp_records.
+    """
+    counter = collections.Counter()
+    for record in exp_records:
+        counter[record.category.reduced_category] += record.amount
+    return counter
+
+
+@app.callback(
+    Output("cash_flow_review_graph_monthly", "figure"),
+    Input("report_date_picker_monthly", "value"),
+)
+def cash_flow_review_graph_monthly(date_str: str):
+    end_date = get_date_from_date_str(date_str)
+    if not end_date:
+        return None
+    months = []
+    reduced_category_counters = []
+    for month_delta in range(-13, 0):
+        month_slice_start = far_core.month_delta(end_date, month_delta)
+        month_slice_end = far_core.month_delta(end_date, month_delta + 1)
+        months.append(month_slice_start)
+        exp_records = apps.get_filtered_expense_records(
+            end_date=month_slice_end, start_date=month_slice_start
+        )
+        reduced_category_counters.append(
+            get_cash_flow_review_graph_counter(exp_records)
+        )
+    df = pd.DataFrame(index=months)
+    colours = []
+    for red_cat in far_core.ReducedCategory:
+        df[str(red_cat)] = [
+            float(cntr[red_cat]) for cntr in reduced_category_counters
+        ]
+        colours.append(red_cat.colour)
+    return px.line(
+        df,
+        x=df.index,
+        y=df.columns,
+        title="Monthly Cash Flow Review",
+        color_discrete_sequence=colours,
+        labels={
+            "index": "Month",
+            "value": "Spending (USD)",
+            "variable": "Category"
+        },
+    )
+
+
+@app.callback(
+    Output("cash_flow_review_graph_annual", "figure"),
+    Input("report_date_picker_annual", "value"),
+)
+def cash_flow_review_graph_annual(date_str: str):
+    end_date = get_date_from_date_str(date_str)
+    if not end_date:
+        return None
+    months = []
+    reduced_category_counters = []
+    for month_delta in range((-12 * 3) - 1, 0):  # Three years
+        month_slice_start = far_core.month_delta(end_date, month_delta)
+        month_slice_end = far_core.month_delta(end_date, month_delta + 1)
+        months.append(month_slice_start)
+        exp_records = apps.get_filtered_expense_records(
+            end_date=month_slice_end, start_date=month_slice_start
+        )
+        reduced_category_counters.append(
+            get_cash_flow_review_graph_counter(exp_records)
+        )
+    df = pd.DataFrame(index=months)
+    colours = []
+    for red_cat in far_core.ReducedCategory:
+        df[str(red_cat)] = [
+            float(cntr[red_cat]) for cntr in reduced_category_counters
+        ]
+        colours.append(red_cat.colour)
+    return px.line(
+        df,
+        x=df.index,
+        y=df.columns,
+        title="Annual Cash Flow Review",
+        color_discrete_sequence=colours,
+        labels={
+            "index": "Month",
+            "value": "Spending (USD)",
+            "variable": "Category"
+        },
+    )
