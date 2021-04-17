@@ -35,6 +35,16 @@ class ReducedCategory(str, enum.Enum):
     def __str__(self):
         return self.value
 
+    @property
+    def colour(self):
+        return {
+            self.asset: "green",
+            self.debt: "red",
+            self.fun: "orange",
+            self.mandatory: "gray",
+            self.misc: "blue",
+        }[self]
+
 
 @enum.unique
 class ExpenseCategory(str, enum.Enum):
