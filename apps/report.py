@@ -81,16 +81,33 @@ def get_date_from_date_str(date_str: str) -> datetime.date:
     return datetime.date(year, month, 1)
 
 
-def get_category_counter(exp_records: list) -> collections.Counter:
+def get_category_counter(records: list) -> collections.Counter:
     counter = collections.Counter()
-    for record in exp_records:
+    for record in records:
         counter[record.category] += record.amount
     return counter
 
 
-def get_categorical_review_table_rows(category_counters: list) -> list:
+def get_categorical_review_table_expense_rows(category_counters: list) -> list:
     cat_rows = []
     for cat in far_core.ExpenseCategory:
+        if all(not cat_counter[cat] for cat_counter in category_counters):
+            # Skip zero-filled categories
+            continue
+        cat_rows.append(
+            html.Tr(
+                [html.Td(str(cat))] + [
+                    html.Td(far_core.usd_str(cat_counter[cat]))
+                    for cat_counter in category_counters
+                ]
+            )
+        )
+    return cat_rows
+
+
+def get_categorical_review_table_income_rows(category_counters: list) -> list:
+    cat_rows = []
+    for cat in far_core.IncomeCategory:
         if all(not cat_counter[cat] for cat_counter in category_counters):
             # Skip zero-filled categories
             continue
@@ -113,7 +130,7 @@ def categorical_review_table_monthly(date_str: str):
     end_date = get_date_from_date_str(date_str)
     if not end_date:
         return []
-    header_row = [
+    table_rows = [
         html.Thead([
             html.Tr([html.Th("Categorical Expense Review: Monthly", colSpan=4)]),
             html.Tr([
@@ -134,9 +151,9 @@ def categorical_review_table_monthly(date_str: str):
         category_counters.append(
             get_category_counter(exp_records)
         )
-    category_rows = get_categorical_review_table_rows(category_counters)
-    header_row.append(html.Tbody(category_rows))
-    return header_row
+    category_rows = get_categorical_review_table_expense_rows(category_counters)
+    table_rows.append(html.Tbody(category_rows))
+    return table_rows
 
 
 @app.callback(
@@ -173,7 +190,7 @@ def categorical_review_table_annual(date_str: str):
         category_counters.append(
             get_category_counter(exp_records)
         )
-    category_rows = get_categorical_review_table_rows(category_counters)
+    category_rows = get_categorical_review_table_expense_rows(category_counters)
     header_row.append(html.Tbody(category_rows))
     return header_row
 
