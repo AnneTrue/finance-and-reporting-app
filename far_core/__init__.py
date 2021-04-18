@@ -5,6 +5,8 @@ e.g. configuration data, utility functions unrelated to the web apps.
 """
 
 import datetime
+import decimal
+
 import dateutil.relativedelta
 import enum
 
@@ -192,3 +194,10 @@ def usd_str(amount: float) -> str:
     if amount < 0:
         return f"(${amount:,.2f})"
     return f"${amount:,.2f}"
+
+
+def sum_all_records(records: list) -> decimal.Decimal:
+    sum_records = decimal.Decimal(0)
+    for record in records:
+        sum_records += record.amount
+    return sum_records

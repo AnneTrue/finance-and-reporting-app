@@ -2,6 +2,7 @@
 
 import collections
 import datetime
+import decimal
 import re
 
 from dash.dependencies import Input, Output, State
@@ -46,6 +47,10 @@ def get_layout(report_type: str):
 
     # Cash-flow Review Graph
     children.append(dcc.Graph(id=f"cash_flow_review_graph_{report_type}"))
+    children.append(html.Hr())
+
+    # KPI Graph
+    children.append(dcc.Graph(id=f"kpi_graph_{report_type}"))
     children.append(html.Hr())
 
     # Categorical Expense Breakdown
@@ -369,7 +374,7 @@ def discretionary_spending_review_graph_annual(date_str: str):
         return None
     months = []
     account_counters = []
-    for month_delta in range(-(12 * 3) - 1 , 0):
+    for month_delta in range(-(12 * 3) - 1, 0):
         month_slice_start = far_core.month_delta(end_date, month_delta)
         month_slice_end = far_core.month_delta(end_date, month_delta + 1)
         months.append(month_slice_start)
@@ -398,5 +403,133 @@ def discretionary_spending_review_graph_annual(date_str: str):
             "index": "Month",
             "value": "Spending (USD)",
             "variable": "Account"
+        },
+    )
+
+
+def get_discretionary_rate(exp_records: list) -> decimal.Decimal:
+    """
+    :param List[far_core.db.ExpenseRecord] exp_records: window of expenses
+    :return: the discretionary rate over the window, which is defined as
+        (discretionary expenses / total non-asset & non-misc spending).
+    """
+    total_expense = decimal.Decimal(0)
+    total_discretionary = decimal.Decimal(0)
+    for exp_record in exp_records:
+        if exp_record.category.reduced_category in (
+            far_core.ReducedCategory.fun, far_core.ReducedCategory.mandatory,
+            far_core.ReducedCategory.debt,
+        ):
+            total_expense += exp_record.amount
+        if exp_record.category.reduced_category is far_core.ReducedCategory.fun:
+            total_discretionary += exp_record.amount
+    return (
+        total_discretionary / total_expense if total_expense else total_expense
+    )  # avoid zero division
+
+
+def get_savings_rate(exp_records: list, inc_records: list) -> decimal.Decimal:
+    """
+    :param List[far_core.db.ExpenseRecord] exp_records: window of expenses
+    :param List[far_core.db.IncomeRecord] inc_records: window of incomes
+    :return: the savings rate over the window, which is defined as:
+        (income - expenses) / income.
+    """
+    total_expense = decimal.Decimal(0)
+    total_income = far_core.sum_all_records(inc_records)
+    for exp_record in exp_records:
+        if exp_record.category.reduced_category in (
+            far_core.ReducedCategory.fun, far_core.ReducedCategory.mandatory,
+            far_core.ReducedCategory.debt,
+        ):
+            total_expense += exp_record.amount
+    return (
+        (total_income - total_expense) / total_income
+        if total_income else total_income  # avoid zero division error
+    )
+
+
+@app.callback(
+    Output("kpi_graph_monthly", "figure"),
+    Input("report_date_picker_monthly", "value"),
+)
+def kpi_graph_monthly(date_str: str):
+    end_date = get_date_from_date_str(date_str)
+    if not end_date:
+        return None
+    months = []
+    savings_rates = []
+    discretionary_rates = []
+    for month_delta in range(-13, 0):
+        month_slice_start = far_core.month_delta(end_date, month_delta)
+        month_slice_end = far_core.month_delta(end_date, month_delta + 1)
+        months.append(month_slice_start)
+        inc_records = apps.get_filtered_income_records(
+            end_date=month_slice_end, start_date=month_slice_start
+        )
+        exp_records = apps.get_filtered_expense_records(
+            end_date=month_slice_end, start_date=month_slice_start
+        )
+        discretionary_rates.append(get_discretionary_rate(exp_records))
+        savings_rates.append(
+            get_savings_rate(exp_records=exp_records, inc_records=inc_records)
+        )
+    df = pd.DataFrame(index=months)
+    df["Savings Rate"] = savings_rates
+    df["Discretionary Rate"] = discretionary_rates
+    colours = ["green", "red"]
+    return px.line(
+        df,
+        x=df.index,
+        y=df.columns,
+        title="Key Performance Indicators",
+        color_discrete_sequence=colours,
+        labels={
+            "index": "Month",
+            "value": "",
+            "variable": "KPI"
+        },
+    )
+
+
+@app.callback(
+    Output("kpi_graph_annual", "figure"),
+    Input("report_date_picker_annual", "value"),
+)
+def kpi_graph_annual(date_str: str):
+    end_date = get_date_from_date_str(date_str)
+    if not end_date:
+        return None
+    months = []
+    savings_rates = []
+    discretionary_rates = []
+    for month_delta in range(-(12 * 3) - 1, 0):
+        month_slice_start = far_core.month_delta(end_date, month_delta)
+        month_slice_end = far_core.month_delta(end_date, month_delta + 1)
+        months.append(month_slice_start)
+        inc_records = apps.get_filtered_income_records(
+            end_date=month_slice_end, start_date=month_slice_start
+        )
+        exp_records = apps.get_filtered_expense_records(
+            end_date=month_slice_end, start_date=month_slice_start
+        )
+        discretionary_rates.append(get_discretionary_rate(exp_records))
+        savings_rates.append(
+            get_savings_rate(exp_records=exp_records, inc_records=inc_records)
+        )
+    df = pd.DataFrame(index=months)
+    df["Savings Rate"] = savings_rates
+    df["Discretionary Rate"] = discretionary_rates
+    colours = ["green", "red"]
+    return px.line(
+        df,
+        x=df.index,
+        y=df.columns,
+        title="Key Performance Indicators",
+        color_discrete_sequence=colours,
+        labels={
+            "index": "Month",
+            "value": "",
+            "variable": "KPI"
         },
     )
