@@ -9,6 +9,7 @@ from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_table
 import pandas as pd
 import plotly.express as px
 
@@ -66,6 +67,17 @@ def get_layout(report_type: str):
         id=f"discretionary_spending_review_graph_{report_type}"
     ))
     children.append(html.Hr())
+
+    # Expense & Income breakdown
+    if report_type == "monthly":
+        children.append(
+            html.Div("Loading table...", id="expense_breakdown_monthly_div")
+        )
+        children.append(html.Hr())
+        children.append(
+            html.Div("Loading table...", id="income_breakdown_monthly_div")
+        )
+        children.append(html.Hr())
     return html.Div(
         [
             apps.NAVBAR,
@@ -226,7 +238,7 @@ def get_reduced_category_counter(
 def cash_flow_review_graph_monthly(date_str: str):
     end_date = get_date_from_date_str(date_str)
     if not end_date:
-        return None
+        return {"data": []}
     months = []
     reduced_category_counters = []
     incomes = []
@@ -277,7 +289,7 @@ def cash_flow_review_graph_monthly(date_str: str):
 def cash_flow_review_graph_annual(date_str: str):
     end_date = get_date_from_date_str(date_str)
     if not end_date:
-        return None
+        return {"data": []}
     months = []
     reduced_category_counters = []
     incomes = []
@@ -328,7 +340,7 @@ def cash_flow_review_graph_annual(date_str: str):
 def discretionary_spending_review_graph_monthly(date_str: str):
     end_date = get_date_from_date_str(date_str)
     if not end_date:
-        return None
+        return {"data": []}
     months = []
     account_counters = []
     for month_delta in range(-13, 0):
@@ -371,7 +383,7 @@ def discretionary_spending_review_graph_monthly(date_str: str):
 def discretionary_spending_review_graph_annual(date_str: str):
     end_date = get_date_from_date_str(date_str)
     if not end_date:
-        return None
+        return {"data": []}
     months = []
     account_counters = []
     for month_delta in range(-(12 * 3) - 1, 0):
@@ -456,7 +468,7 @@ def get_savings_rate(exp_records: list, inc_records: list) -> decimal.Decimal:
 def kpi_graph_monthly(date_str: str):
     end_date = get_date_from_date_str(date_str)
     if not end_date:
-        return None
+        return {"data": []}
     months = []
     savings_rates = []
     discretionary_rates = []
@@ -499,7 +511,7 @@ def kpi_graph_monthly(date_str: str):
 def kpi_graph_annual(date_str: str):
     end_date = get_date_from_date_str(date_str)
     if not end_date:
-        return None
+        return {"data": []}
     months = []
     savings_rates = []
     discretionary_rates = []
@@ -533,3 +545,57 @@ def kpi_graph_annual(date_str: str):
             "variable": "KPI"
         },
     )
+
+
+@app.callback(
+    Output("expense_breakdown_monthly_div", "children"),
+    Input("report_date_picker_monthly", "value"),
+)
+def load_expenses(date_str: str):
+    end_date = get_date_from_date_str(date_str)
+    if not end_date:
+        return ["Loading table..."]
+    start_date = far_core.month_delta(end_date, -1)
+    df = apps.dataframe_from_expense_records(
+        apps.get_filtered_expense_records(
+            end_date=end_date, start_date=start_date,
+        )
+    )
+    dtable = dash_table.DataTable(
+        id="expense_breakdown_table",
+        columns=[
+            {"name": col, "id": col} for col in df.columns
+        ],
+        data=df.to_dict("records"),
+        filter_action="native",
+        sort_action="native",
+        fixed_rows={"headers": True, "data": 0},
+    )
+    return dtable
+
+
+@app.callback(
+    Output("income_breakdown_monthly_div", "children"),
+    Input("report_date_picker_monthly", "value"),
+)
+def load_expenses(date_str: str):
+    end_date = get_date_from_date_str(date_str)
+    if not end_date:
+        return ["Loading table..."]
+    start_date = far_core.month_delta(end_date, -1)
+    df = apps.dataframe_from_income_records(
+        apps.get_filtered_income_records(
+            end_date=end_date, start_date=start_date,
+        )
+    )
+    dtable = dash_table.DataTable(
+        id="income_breakdown_table",
+        columns=[
+            {"name": col, "id": col} for col in df.columns
+        ],
+        data=df.to_dict("records"),
+        filter_action="native",
+        sort_action="native",
+        fixed_rows={"headers": True, "data": 0},
+    )
+    return dtable
