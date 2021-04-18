@@ -46,6 +46,26 @@ def get_layout(report_type: str):
     )
     children.append(html.Hr())
 
+    # Executive Summary
+    if report_type == "monthly":
+        children.append(
+            html.Div(
+                id=f"executive_summary_{report_type}",
+                className="card text-white bg-primary mb-3",
+                children=[
+                    html.Div(
+                        id=f"executive_summary_header_{report_type}",
+                        className="card-header",
+                    ),
+                    html.Div(
+                        id=f"executive_summary_text_{report_type}",
+                        className="card-body",
+                    )
+                ],
+            )
+        )
+        children.append(html.Hr())
+
     # Cash-flow Review Graph
     children.append(dcc.Graph(id=f"cash_flow_review_graph_{report_type}"))
     children.append(html.Hr())
@@ -102,6 +122,52 @@ def get_date_from_date_str(date_str: str) -> datetime.date:
         return None
     year, month = int(m.group(1)), int(m.group(2))
     return datetime.date(year, month, 1)
+
+
+@app.callback(
+    [
+        Output("executive_summary_header_monthly", "children"),
+        Output("executive_summary_text_monthly", "children"),
+    ],
+    Input("report_date_picker_monthly", "value"),
+)
+def executive_summary_monthly(date_str: str) -> tuple:
+    end_date = get_date_from_date_str(date_str)
+    if not end_date:
+        return ["No summary..."], [f"No summary available for {date_str}"]
+    start_date = far_core.month_delta(end_date, -1)
+    exp_records = apps.get_filtered_expense_records(
+        end_date=end_date, start_date=start_date,
+    )
+    inc_records = apps.get_filtered_income_records(
+        end_date=end_date, start_date=start_date,
+    )
+    total_expenses = far_core.sum_all_records(exp_records)
+    total_income = far_core.sum_all_records(inc_records)
+    net_cashflow = total_income - total_expenses
+    header_children = []
+    if net_cashflow > 0:
+        header_children.append(html.H4("Executive Summary: Net Positive!"))
+    else:
+        header_children.append(html.H4("Executive Summary: Negative..."))
+    text_children = []
+    text_children.append(html.P(
+        "Summary for the month of {}".format(start_date.strftime("%Y-%m")),
+        className="card-text",
+    ))
+    text_children.append(html.P(
+        f"Net Cashflow: {far_core.usd_str(net_cashflow)}",
+        className="card-text",
+    ))
+    text_children.append(html.P(
+        f"Total Income: {far_core.usd_str(total_income)}",
+        className="card-text",
+    ))
+    text_children.append(html.P(
+        f"Total Expenses: {far_core.usd_str(total_expenses)}",
+        className="card-text",
+    ))
+    return header_children, text_children
 
 
 def get_category_counter(records: list) -> collections.Counter:
