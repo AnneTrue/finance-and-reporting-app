@@ -10,6 +10,9 @@ dash-bootstrap-components = "*"
 flask-sqlalchemy = "*"
 flask-caching = "*"
 python-dateutil = "*"
+scipy = "*"
+numpy = "*"
+statsmodels = "*"
 
 [dev-packages]
 

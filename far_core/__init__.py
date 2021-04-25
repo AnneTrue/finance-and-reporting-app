@@ -6,6 +6,7 @@ e.g. configuration data, utility functions unrelated to the web apps.
 
 import datetime
 import decimal
+import re
 
 import dateutil.relativedelta
 import enum
@@ -201,3 +202,11 @@ def sum_all_records(records: list) -> decimal.Decimal:
     for record in records:
         sum_records += record.amount
     return sum_records
+
+
+def get_date_from_date_str(date_str: str) -> datetime.date:
+    m = re.match(r"(\d{4})-([1-9]|1[0-2]|0[1-9])", date_str)
+    if not m:
+        return None
+    year, month = int(m.group(1)), int(m.group(2))
+    return datetime.date(year, month, 1)

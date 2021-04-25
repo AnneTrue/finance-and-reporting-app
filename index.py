@@ -11,6 +11,7 @@ import dash_html_components as html
 
 from app import app
 import apps.expenses
+import apps.forecast
 import apps.incomes
 import apps.input
 import apps.main
@@ -41,6 +42,8 @@ def display_page(pathname):
         return apps.report.ANNUAL_LAYOUT
     elif pathname == "/report/monthly":
         return apps.report.MONTHLY_LAYOUT
+    elif pathname == "/report/forecast":
+        return apps.forecast.LAYOUT
     else:
         return [
             html.Div(

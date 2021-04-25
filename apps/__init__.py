@@ -20,6 +20,7 @@ NAVBAR = dbc.NavbarSimple(
             children=[
                 dbc.DropdownMenuItem("Monthly Review", href="/report/monthly"),
                 dbc.DropdownMenuItem("Annual Review", href="/report/annual"),
+                dbc.DropdownMenuItem("Forecast", href="/report/forecast"),
             ],
             nav=True,
             in_navbar=True,

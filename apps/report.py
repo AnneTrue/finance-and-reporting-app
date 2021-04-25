@@ -1,11 +1,9 @@
 #!/usr/bin/python3
 
 import collections
-import datetime
 import decimal
-import re
 
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
@@ -16,6 +14,7 @@ import plotly.express as px
 from app import app
 import apps
 import far_core
+from far_core import get_date_from_date_str
 
 
 def get_layout(report_type: str):
@@ -114,14 +113,6 @@ def get_layout(report_type: str):
 
 ANNUAL_LAYOUT = get_layout("annual")
 MONTHLY_LAYOUT = get_layout("monthly")
-
-
-def get_date_from_date_str(date_str: str) -> datetime.date:
-    m = re.match(r"(\d{4})-([1-9]|1[0-2]|0[1-9])", date_str)
-    if not m:
-        return None
-    year, month = int(m.group(1)), int(m.group(2))
-    return datetime.date(year, month, 1)
 
 
 @app.callback(
