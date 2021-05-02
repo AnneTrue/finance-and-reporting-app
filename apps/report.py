@@ -36,7 +36,7 @@ def get_layout(report_type: str):
                     debounce=True,
                     type="text",
                     value=far_core.get_current_month().strftime("%Y-%m"),
-                    placeholder="Month to end report on, e.g. \"2000-01\"",
+                    placeholder='Month to end report on, e.g. "2000-01"',
                     pattern=r"\d{4}-([1-9]|1[0-2]|0[1-9])",
                 ),
             ],
@@ -59,7 +59,7 @@ def get_layout(report_type: str):
                     html.Div(
                         id=f"executive_summary_text_{report_type}",
                         className="card-body",
-                    )
+                    ),
                 ],
             )
         )
@@ -76,15 +76,16 @@ def get_layout(report_type: str):
     # Categorical Expense Breakdown
     children.append(
         dbc.Table(
-            children=[], id=f"categorical_expense_table_{report_type}",
-            bordered=True, responsive=True, striped=True,
+            children=[],
+            id=f"categorical_expense_table_{report_type}",
+            bordered=True,
+            responsive=True,
+            striped=True,
         )
     )
 
     # Discretionary Spending Review Graph
-    children.append(dcc.Graph(
-        id=f"discretionary_spending_review_graph_{report_type}"
-    ))
+    children.append(dcc.Graph(id=f"discretionary_spending_review_graph_{report_type}"))
     children.append(html.Hr())
 
     # Expense & Income breakdown
@@ -93,20 +94,20 @@ def get_layout(report_type: str):
             html.Div("Loading table...", id="expense_breakdown_monthly_div")
         )
         children.append(html.Hr())
-        children.append(
-            html.Div("Loading table...", id="income_breakdown_monthly_div")
-        )
+        children.append(html.Div("Loading table...", id="income_breakdown_monthly_div"))
         children.append(html.Hr())
     return html.Div(
         [
             apps.NAVBAR,
             dbc.Row(
                 dbc.Col(
-                    children=children, id=f"main_report_col_{report_type}",
-                    width=8, align="center",
+                    children=children,
+                    id=f"main_report_col_{report_type}",
+                    width=8,
+                    align="center",
                 ),
                 justify="center",
-            )
+            ),
         ]
     )
 
@@ -128,10 +129,12 @@ def executive_summary_monthly(date_str: str) -> tuple:
         return ["No summary..."], [f"No summary available for {date_str}"]
     start_date = far_core.month_delta(end_date, -1)
     exp_records = apps.get_filtered_expense_records(
-        end_date=end_date, start_date=start_date,
+        end_date=end_date,
+        start_date=start_date,
     )
     inc_records = apps.get_filtered_income_records(
-        end_date=end_date, start_date=start_date,
+        end_date=end_date,
+        start_date=start_date,
     )
     total_expenses = far_core.sum_all_records(exp_records)
     total_income = far_core.sum_all_records(inc_records)
@@ -142,22 +145,30 @@ def executive_summary_monthly(date_str: str) -> tuple:
     else:
         header_children.append(html.H4("Executive Summary: Negative..."))
     text_children = []
-    text_children.append(html.P(
-        "Summary for the month of {}".format(start_date.strftime("%Y-%m")),
-        className="card-text",
-    ))
-    text_children.append(html.P(
-        f"Net Cashflow: {far_core.usd_str(net_cashflow)}",
-        className="card-text",
-    ))
-    text_children.append(html.P(
-        f"Total Income: {far_core.usd_str(total_income)}",
-        className="card-text",
-    ))
-    text_children.append(html.P(
-        f"Total Expenses: {far_core.usd_str(total_expenses)}",
-        className="card-text",
-    ))
+    text_children.append(
+        html.P(
+            "Summary for the month of {}".format(start_date.strftime("%Y-%m")),
+            className="card-text",
+        )
+    )
+    text_children.append(
+        html.P(
+            f"Net Cashflow: {far_core.usd_str(net_cashflow)}",
+            className="card-text",
+        )
+    )
+    text_children.append(
+        html.P(
+            f"Total Income: {far_core.usd_str(total_income)}",
+            className="card-text",
+        )
+    )
+    text_children.append(
+        html.P(
+            f"Total Expenses: {far_core.usd_str(total_expenses)}",
+            className="card-text",
+        )
+    )
     return header_children, text_children
 
 
@@ -176,7 +187,8 @@ def get_categorical_review_table_expense_rows(category_counters: list) -> list:
             continue
         cat_rows.append(
             html.Tr(
-                [html.Td(str(cat))] + [
+                [html.Td(str(cat))]
+                + [
                     html.Td(far_core.usd_str(cat_counter[cat]))
                     for cat_counter in category_counters
                 ]
@@ -193,7 +205,8 @@ def get_categorical_review_table_income_rows(category_counters: list) -> list:
             continue
         cat_rows.append(
             html.Tr(
-                [html.Td(str(cat))] + [
+                [html.Td(str(cat))]
+                + [
                     html.Td(far_core.usd_str(cat_counter[cat]))
                     for cat_counter in category_counters
                 ]
@@ -211,15 +224,19 @@ def categorical_review_table_monthly(date_str: str):
     if not end_date:
         return []
     table_rows = [
-        html.Thead([
-            html.Tr([html.Th("Categorical Expense Review: Monthly", colSpan=4)]),
-            html.Tr([
-                html.Th("Category"),
-                html.Th(far_core.month_delta(end_date, -3).strftime("%Y-%m")),
-                html.Th(far_core.month_delta(end_date, -2).strftime("%Y-%m")),
-                html.Th(far_core.month_delta(end_date, -1).strftime("%Y-%m")),
-            ]),
-        ]),
+        html.Thead(
+            [
+                html.Tr([html.Th("Categorical Expense Review: Monthly", colSpan=4)]),
+                html.Tr(
+                    [
+                        html.Th("Category"),
+                        html.Th(far_core.month_delta(end_date, -3).strftime("%Y-%m")),
+                        html.Th(far_core.month_delta(end_date, -2).strftime("%Y-%m")),
+                        html.Th(far_core.month_delta(end_date, -1).strftime("%Y-%m")),
+                    ]
+                ),
+            ]
+        ),
     ]
     category_counters = []
     for month_delta in range(-3, 0):
@@ -228,9 +245,7 @@ def categorical_review_table_monthly(date_str: str):
         exp_records = apps.get_filtered_expense_records(
             end_date=month_slice_end, start_date=month_slice_start
         )
-        category_counters.append(
-            get_category_counter(exp_records)
-        )
+        category_counters.append(get_category_counter(exp_records))
     category_rows = get_categorical_review_table_expense_rows(category_counters)
     table_rows.append(html.Tbody(category_rows))
     return table_rows
@@ -245,20 +260,22 @@ def categorical_review_table_annual(date_str: str):
     if not end_date:
         return []
     header_row = [
-        html.Thead([
-            html.Tr([html.Th("Categorical Expense Review: Annual", colSpan=4)]),
-            html.Tr([
-                html.Th("Category"),
-                html.Th(
-                    "Year ending on {}".format(
-                        far_core.month_delta(end_date, -12).strftime("%Y-%m")
-                    )
+        html.Thead(
+            [
+                html.Tr([html.Th("Categorical Expense Review: Annual", colSpan=4)]),
+                html.Tr(
+                    [
+                        html.Th("Category"),
+                        html.Th(
+                            "Year ending on {}".format(
+                                far_core.month_delta(end_date, -12).strftime("%Y-%m")
+                            )
+                        ),
+                        html.Th("Year ending on {}".format(end_date.strftime("%Y-%m"))),
+                    ]
                 ),
-                html.Th(
-                    "Year ending on {}".format(end_date.strftime("%Y-%m"))
-                ),
-            ]),
-        ]),
+            ]
+        ),
     ]
     category_counters = []
     for month_delta in range(-25, -12, 12):
@@ -267,17 +284,13 @@ def categorical_review_table_annual(date_str: str):
         exp_records = apps.get_filtered_expense_records(
             end_date=month_slice_end, start_date=month_slice_start
         )
-        category_counters.append(
-            get_category_counter(exp_records)
-        )
+        category_counters.append(get_category_counter(exp_records))
     category_rows = get_categorical_review_table_expense_rows(category_counters)
     header_row.append(html.Tbody(category_rows))
     return header_row
 
 
-def get_reduced_category_counter(
-        exp_records: list
-) -> collections.Counter:
+def get_reduced_category_counter(exp_records: list) -> collections.Counter:
     """
     :return: a collections.Counter with keys of far_core.ReducedCategory and
         value of the sum of expenses in that reduced category from exp_records.
@@ -306,9 +319,7 @@ def cash_flow_review_graph_monthly(date_str: str):
         exp_records = apps.get_filtered_expense_records(
             end_date=month_slice_end, start_date=month_slice_start
         )
-        reduced_category_counters.append(
-            get_reduced_category_counter(exp_records)
-        )
+        reduced_category_counters.append(get_reduced_category_counter(exp_records))
         inc_records = apps.get_filtered_income_records(
             end_date=month_slice_end, start_date=month_slice_start
         )
@@ -319,9 +330,7 @@ def cash_flow_review_graph_monthly(date_str: str):
     df = pd.DataFrame(index=months)
     colours = []
     for red_cat in far_core.ReducedCategory:
-        df[str(red_cat)] = [
-            float(cntr[red_cat]) for cntr in reduced_category_counters
-        ]
+        df[str(red_cat)] = [float(cntr[red_cat]) for cntr in reduced_category_counters]
         colours.append(red_cat.colour)
     df["Income"] = incomes
     colours.append("black")
@@ -331,11 +340,7 @@ def cash_flow_review_graph_monthly(date_str: str):
         y=df.columns,
         title="Monthly Cash Flow Review",
         color_discrete_sequence=colours,
-        labels={
-            "index": "Month",
-            "value": "Spending (USD)",
-            "variable": "Category"
-        },
+        labels={"index": "Month", "value": "Spending (USD)", "variable": "Category"},
     )
 
 
@@ -357,9 +362,7 @@ def cash_flow_review_graph_annual(date_str: str):
         exp_records = apps.get_filtered_expense_records(
             end_date=month_slice_end, start_date=month_slice_start
         )
-        reduced_category_counters.append(
-            get_reduced_category_counter(exp_records)
-        )
+        reduced_category_counters.append(get_reduced_category_counter(exp_records))
         inc_records = apps.get_filtered_income_records(
             end_date=month_slice_end, start_date=month_slice_start
         )
@@ -370,9 +373,7 @@ def cash_flow_review_graph_annual(date_str: str):
     df = pd.DataFrame(index=months)
     colours = []
     for red_cat in far_core.ReducedCategory:
-        df[str(red_cat)] = [
-            float(cntr[red_cat]) for cntr in reduced_category_counters
-        ]
+        df[str(red_cat)] = [float(cntr[red_cat]) for cntr in reduced_category_counters]
         colours.append(red_cat.colour)
     df["Income"] = incomes
     colours.append("black")
@@ -382,11 +383,7 @@ def cash_flow_review_graph_annual(date_str: str):
         y=df.columns,
         title="Annual Cash Flow Review",
         color_discrete_sequence=colours,
-        labels={
-            "index": "Month",
-            "value": "Spending (USD)",
-            "variable": "Category"
-        },
+        labels={"index": "Month", "value": "Spending (USD)", "variable": "Category"},
     )
 
 
@@ -415,9 +412,7 @@ def discretionary_spending_review_graph_monthly(date_str: str):
     df = pd.DataFrame(index=months)
     colours = []
     for account in far_core.Accounts:
-        df[str(account)] = [
-            float(cntr[account]) for cntr in account_counters
-        ]
+        df[str(account)] = [float(cntr[account]) for cntr in account_counters]
         colours.append(account.colour)
     return px.line(
         df,
@@ -425,11 +420,7 @@ def discretionary_spending_review_graph_monthly(date_str: str):
         y=df.columns,
         title="Discretionary Spending Review",
         color_discrete_sequence=colours,
-        labels={
-            "index": "Month",
-            "value": "Spending (USD)",
-            "variable": "Account"
-        },
+        labels={"index": "Month", "value": "Spending (USD)", "variable": "Account"},
     )
 
 
@@ -458,9 +449,7 @@ def discretionary_spending_review_graph_annual(date_str: str):
     df = pd.DataFrame(index=months)
     colours = []
     for account in far_core.Accounts:
-        df[str(account)] = [
-            float(cntr[account]) for cntr in account_counters
-        ]
+        df[str(account)] = [float(cntr[account]) for cntr in account_counters]
         colours.append(account.colour)
     return px.line(
         df,
@@ -468,11 +457,7 @@ def discretionary_spending_review_graph_annual(date_str: str):
         y=df.columns,
         title="Discretionary Spending Review",
         color_discrete_sequence=colours,
-        labels={
-            "index": "Month",
-            "value": "Spending (USD)",
-            "variable": "Account"
-        },
+        labels={"index": "Month", "value": "Spending (USD)", "variable": "Account"},
     )
 
 
@@ -486,7 +471,8 @@ def get_discretionary_rate(exp_records: list) -> decimal.Decimal:
     total_discretionary = decimal.Decimal(0)
     for exp_record in exp_records:
         if exp_record.category.reduced_category in (
-            far_core.ReducedCategory.fun, far_core.ReducedCategory.mandatory,
+            far_core.ReducedCategory.fun,
+            far_core.ReducedCategory.mandatory,
             far_core.ReducedCategory.debt,
         ):
             total_expense += exp_record.amount
@@ -508,13 +494,15 @@ def get_savings_rate(exp_records: list, inc_records: list) -> decimal.Decimal:
     total_income = far_core.sum_all_records(inc_records)
     for exp_record in exp_records:
         if exp_record.category.reduced_category in (
-            far_core.ReducedCategory.fun, far_core.ReducedCategory.mandatory,
+            far_core.ReducedCategory.fun,
+            far_core.ReducedCategory.mandatory,
             far_core.ReducedCategory.debt,
         ):
             total_expense += exp_record.amount
     return (
         (total_income - total_expense) / total_income
-        if total_income else total_income  # avoid zero division error
+        if total_income
+        else total_income  # avoid zero division error
     )
 
 
@@ -553,11 +541,7 @@ def kpi_graph_monthly(date_str: str):
         y=df.columns,
         title="Key Performance Indicators",
         color_discrete_sequence=colours,
-        labels={
-            "index": "Month",
-            "value": "",
-            "variable": "KPI"
-        },
+        labels={"index": "Month", "value": "", "variable": "KPI"},
     )
 
 
@@ -596,11 +580,7 @@ def kpi_graph_annual(date_str: str):
         y=df.columns,
         title="Key Performance Indicators",
         color_discrete_sequence=colours,
-        labels={
-            "index": "Month",
-            "value": "",
-            "variable": "KPI"
-        },
+        labels={"index": "Month", "value": "", "variable": "KPI"},
     )
 
 
@@ -615,14 +595,13 @@ def load_expenses(date_str: str):
     start_date = far_core.month_delta(end_date, -1)
     df = apps.dataframe_from_expense_records(
         apps.get_filtered_expense_records(
-            end_date=end_date, start_date=start_date,
+            end_date=end_date,
+            start_date=start_date,
         )
     )
     dtable = dash_table.DataTable(
         id="expense_breakdown_table",
-        columns=[
-            {"name": col, "id": col} for col in df.columns if col != 'id'
-        ],
+        columns=[{"name": col, "id": col} for col in df.columns if col != "id"],
         data=df.to_dict("records"),
         filter_action="native",
         sort_action="native",
@@ -643,14 +622,13 @@ def load_incomes(date_str: str):
     start_date = far_core.month_delta(end_date, -1)
     df = apps.dataframe_from_income_records(
         apps.get_filtered_income_records(
-            end_date=end_date, start_date=start_date,
+            end_date=end_date,
+            start_date=start_date,
         )
     )
     dtable = dash_table.DataTable(
         id="income_breakdown_table",
-        columns=[
-            {"name": col, "id": col} for col in df.columns if col != 'id'
-        ],
+        columns=[{"name": col, "id": col} for col in df.columns if col != "id"],
         data=df.to_dict("records"),
         filter_action="native",
         sort_action="native",

@@ -10,18 +10,15 @@ import apps
 import far_core.db
 
 
-LAYOUT = html.Div([
-    apps.NAVBAR,
-    dbc.Row(
-        [
-            dbc.Col(
-                [html.Div("Loading...", id="income_table_div")],
-                width=10
-            )
-        ],
-        justify="center",
-    ),
-])
+LAYOUT = html.Div(
+    [
+        apps.NAVBAR,
+        dbc.Row(
+            [dbc.Col([html.Div("Loading...", id="income_table_div")], width=10)],
+            justify="center",
+        ),
+    ]
+)
 
 
 @app.callback(
@@ -35,9 +32,7 @@ def load_incomes(pathname: str):
     df.sort_values(by="Date", ascending=False)
     dtable = dash_table.DataTable(
         id="income_datatable",
-        columns=[
-            {"name": col, "id": col} for col in df.columns if col != 'id'
-        ],
+        columns=[{"name": col, "id": col} for col in df.columns if col != "id"],
         data=df.to_dict("records"),
         filter_action="native",
         row_selectable="multi",

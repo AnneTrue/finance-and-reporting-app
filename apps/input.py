@@ -33,31 +33,35 @@ class InputType(enum.Enum):
 
 
 def get_layout():
-    return html.Div([
-        apps.NAVBAR,
-        dbc.Alert(
-            "Input validation error! Please check your inputs for mistakes",
-            id="input_alert_auto",
-            is_open=False,
-            duration=4000,  # TODO: increase this and add error message
-        ),
-        dbc.Row(
-            [
-                dbc.Col(get_account_dropdown(), width=3),
-                dbc.Col(
-                    [get_input_submit_button(), get_input_clear_button()],
-                    width=1,
-                ),
-            ],
-            align="center",
-            justify="center",
-        ),
-        html.Hr(),
-        dbc.Row([
-            dbc.Col(html.Div(get_input_form(InputType.expense))),
-            dbc.Col(html.Div(get_input_form(InputType.income))),
-        ]),
-    ])
+    return html.Div(
+        [
+            apps.NAVBAR,
+            dbc.Alert(
+                "Input validation error! Please check your inputs for mistakes",
+                id="input_alert_auto",
+                is_open=False,
+                duration=4000,  # TODO: increase this and add error message
+            ),
+            dbc.Row(
+                [
+                    dbc.Col(get_account_dropdown(), width=3),
+                    dbc.Col(
+                        [get_input_submit_button(), get_input_clear_button()],
+                        width=1,
+                    ),
+                ],
+                align="center",
+                justify="center",
+            ),
+            html.Hr(),
+            dbc.Row(
+                [
+                    dbc.Col(html.Div(get_input_form(InputType.expense))),
+                    dbc.Col(html.Div(get_input_form(InputType.income))),
+                ]
+            ),
+        ]
+    )
 
 
 def get_account_dropdown():
@@ -70,7 +74,7 @@ def get_account_dropdown():
             for account in far_core.Accounts
         ],
         placeholder="Select an account",
-        id="account_dropdown"
+        id="account_dropdown",
     )
 
 
@@ -92,16 +96,19 @@ def get_input_form(input_type):
     :return: styling elements
     """
     header_row = [
-        html.Thead(html.Tr([
-            html.Th("Date:"),
-            html.Th("Amount:"),
-            html.Th(f"{input_type} Category:"),
-            html.Th("Notes:"),
-        ])),
+        html.Thead(
+            html.Tr(
+                [
+                    html.Th("Date:"),
+                    html.Th("Amount:"),
+                    html.Th(f"{input_type} Category:"),
+                    html.Th("Notes:"),
+                ]
+            )
+        ),
     ]
     input_rows = [
-        get_input_row(input_type, identifier=i)
-        for i in range(NUMBER_OF_INPUT_ROWS)
+        get_input_row(input_type, identifier=i) for i in range(NUMBER_OF_INPUT_ROWS)
     ]
     table = dbc.Table(
         header_row + [html.Tbody(input_rows)],
@@ -126,36 +133,39 @@ def get_input_row(input_type, identifier):
         categories = (cat_enum for cat_enum in far_core.IncomeCategory)
     else:
         raise NotImplementedError("Only income and expenses inputs are allowed")
-    return html.Tr([
-        html.Td([
-            dcc.Input(id=f"{type_and_identifier}_date", type="text")
-        ]),
-        html.Td([
-            dcc.Input(id=f"{type_and_identifier}_amount", type="number")
-        ]),
-        html.Td([
-            dcc.Dropdown(
-                id=f"{type_and_identifier}_category",
-                options=[
-                    {'label': str(cat), "value": str(cat)} for cat in categories
-                ],
-                placeholder="Category",
-            )
-        ]),
-        html.Td([
-            dcc.Input(
-                id=f"{type_and_identifier}_note", type="text",
-                placeholder="Notes",
-            )
-        ])
-    ])
+    return html.Tr(
+        [
+            html.Td([dcc.Input(id=f"{type_and_identifier}_date", type="text")]),
+            html.Td([dcc.Input(id=f"{type_and_identifier}_amount", type="number")]),
+            html.Td(
+                [
+                    dcc.Dropdown(
+                        id=f"{type_and_identifier}_category",
+                        options=[
+                            {"label": str(cat), "value": str(cat)} for cat in categories
+                        ],
+                        placeholder="Category",
+                    )
+                ]
+            ),
+            html.Td(
+                [
+                    dcc.Input(
+                        id=f"{type_and_identifier}_note",
+                        type="text",
+                        placeholder="Notes",
+                    )
+                ]
+            ),
+        ]
+    )
 
 
 LAYOUT = get_layout()
 
 
 def validate_expense_input(
-        account: str, amount: float, category: str, date: str, note: str
+    account: str, amount: float, category: str, date: str, note: str
 ) -> dict:
     # All non-account inputs are null, therefore empty row to skip:
     if not amount and not category and not date and not note:
@@ -179,7 +189,7 @@ def validate_expense_input(
 
 
 def validate_income_input(
-        account: str, amount: float, category: str, date: str, note: str
+    account: str, amount: float, category: str, date: str, note: str
 ) -> dict:
     # All non-account inputs are null, therefore empty row to skip:
     if not amount and not category and not date and not note:
@@ -207,9 +217,7 @@ def generate_all_input_ids():
     for input_type in InputType:
         for i in range(NUMBER_OF_INPUT_ROWS):
             for specific_input in ("date", "amount", "category", "note"):
-                input_ids.append(
-                    f"input_{input_type}_{i}_{specific_input}"
-                )
+                input_ids.append(f"input_{input_type}_{i}_{specific_input}")
     return input_ids
 
 
@@ -233,8 +241,11 @@ def handle_submit(ctx, account_name: str, in_states: tuple):
         exp_note = ctx.states[f"{exp_id}_note.value"]
         try:
             exp_kwargs = validate_expense_input(
-                date=exp_date, amount=exp_amount, category=exp_category,
-                note=exp_note, account=account_name,
+                date=exp_date,
+                amount=exp_amount,
+                category=exp_category,
+                note=exp_note,
+                account=account_name,
             )
             if exp_kwargs:
                 exp_record = far_core.db.ExpenseRecord(**exp_kwargs)
@@ -251,8 +262,11 @@ def handle_submit(ctx, account_name: str, in_states: tuple):
         inc_note = ctx.states[f"{inc_id}_note.value"]
         try:
             inc_kwargs = validate_income_input(
-                date=inc_date, amount=inc_amount, category=inc_category,
-                note=inc_note, account=account_name,
+                date=inc_date,
+                amount=inc_amount,
+                category=inc_category,
+                note=inc_note,
+                account=account_name,
             )
             if inc_kwargs:
                 inc_record = far_core.db.IncomeRecord(**inc_kwargs)
@@ -271,16 +285,12 @@ def handle_submit(ctx, account_name: str, in_states: tuple):
     [
         Output("input_alert_auto", "is_open"),
         Output("account_dropdown", "value"),
-    ] + [
-        Output(input_id, "value")
-        for input_id in generate_all_input_ids()
-    ],
+    ]
+    + [Output(input_id, "value") for input_id in generate_all_input_ids()],
     Input("clear_input_button", "n_clicks"),
     Input("submit_input_button", "n_clicks"),
-    [State("account_dropdown", "value")] + [
-        State(input_id, "value")
-        for input_id in generate_all_input_ids()
-    ],
+    [State("account_dropdown", "value")]
+    + [State(input_id, "value") for input_id in generate_all_input_ids()],
 )
 def handle_inputs(clear_clicks, submit_clicks, account_name, *in_states):
     """
@@ -291,9 +301,7 @@ def handle_inputs(clear_clicks, submit_clicks, account_name, *in_states):
         raise dash.exceptions.PreventUpdate()
     triggered_ids = tuple(t["prop_id"] for t in ctx.triggered)
     if "submit_input_button.n_clicks" in triggered_ids and submit_clicks:
-        return handle_submit(
-            ctx, account_name=account_name, in_states=in_states
-        )
+        return handle_submit(ctx, account_name=account_name, in_states=in_states)
     elif "clear_input_button.n_clicks" in triggered_ids and clear_clicks:
         return [False, ""] + [""] * len(in_states)
     return (False, account_name) + in_states

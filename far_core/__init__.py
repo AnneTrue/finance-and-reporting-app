@@ -17,6 +17,7 @@ class Accounts(str, enum.Enum):
     """
     An enumeration of accounts, which you should edit as an end-user
     """
+
     # my_name = "My Name"
     # example_joint = "Example Joint"
     anne = "Anne"
@@ -65,33 +66,34 @@ class ExpenseCategory(str, enum.Enum):
     You can check the reduced_category property of an ExpenseCategory enum
     to get the associated ReducedCategory enum
     """
-    business = 'Business & Work'
-    car_fees = 'Car Fees'
-    clothing = 'Clothing'
-    debt = 'Debt'
-    dependents = 'Dependents'
-    dining_out = 'Dining Out'
-    drugs = 'Drugs'
-    education = 'Education'
-    finance = 'Finance'
-    gift = 'Gift'
-    groceries = 'Groceries'
-    grooming = 'Grooming'
-    health = 'Health'
-    household_supplies = 'Household Supplies'
-    house_repairs = 'House Repairs'
-    insurance = 'Insurance'
-    investment = 'Investment'
-    leisure = 'Leisure & Hobbies'
-    mortgage = 'Mortgage'
-    recreation = 'Recreation & Fitness'
-    refueling = 'Refueling'
-    rent = 'Rent'
-    taxes = 'Taxes'
-    transit = 'Transit & Parking'
-    utility_bills = 'Utility Bills'
-    vacation = 'Vacation & Events'
-    other = 'Other'
+
+    business = "Business & Work"
+    car_fees = "Car Fees"
+    clothing = "Clothing"
+    debt = "Debt"
+    dependents = "Dependents"
+    dining_out = "Dining Out"
+    drugs = "Drugs"
+    education = "Education"
+    finance = "Finance"
+    gift = "Gift"
+    groceries = "Groceries"
+    grooming = "Grooming"
+    health = "Health"
+    household_supplies = "Household Supplies"
+    house_repairs = "House Repairs"
+    insurance = "Insurance"
+    investment = "Investment"
+    leisure = "Leisure & Hobbies"
+    mortgage = "Mortgage"
+    recreation = "Recreation & Fitness"
+    refueling = "Refueling"
+    rent = "Rent"
+    taxes = "Taxes"
+    transit = "Transit & Parking"
+    utility_bills = "Utility Bills"
+    vacation = "Vacation & Events"
+    other = "Other"
 
     def __str__(self):
         return self.value
@@ -129,14 +131,10 @@ class ExpenseCategory(str, enum.Enum):
                 self.other: ReducedCategory.misc,
             }[self]
         except KeyError:
-            raise ValueError(
-                f"Category {self.value} does not have a reduced category"
-            )
+            raise ValueError(f"Category {self.value} does not have a reduced category")
 
 
-EXPENSE_CATEGORY_BY_REDUCED_CATEGORY = {
-    red_cat: set() for red_cat in ReducedCategory
-}
+EXPENSE_CATEGORY_BY_REDUCED_CATEGORY = {red_cat: set() for red_cat in ReducedCategory}
 for red_cat in ReducedCategory:
     for cat in ExpenseCategory:
         if cat.reduced_category is red_cat:
@@ -149,6 +147,7 @@ class IncomeCategory(str, enum.Enum):
     An enumeration for incomes.
     You can call str() on an IncomeCategory to get its display name.
     """
+
     capital_gains = "Capital Gains"
     disability = "Disability"
     gift = "Gift"

@@ -17,9 +17,7 @@ def import_expenses_from_json(json_path: str):
         expenses = json.load(f)
     for exp in expenses:
         exp_record = far_core.db.ExpenseRecord(
-            date=datetime.datetime.strptime(
-                exp[0], "%Y-%m-%dT%H:%M:%S.%fZ"
-            ).date(),
+            date=datetime.datetime.strptime(exp[0], "%Y-%m-%dT%H:%M:%S.%fZ").date(),
             amount=exp[1],
             category=exp[2],
             note=exp[3],
@@ -39,9 +37,7 @@ def import_incomes_from_json(json_path):
         expenses = json.load(f)
     for exp in expenses:
         exp_record = far_core.db.IncomeRecord(
-            date=datetime.datetime.strptime(
-                exp[0], "%Y-%m-%dT%H:%M:%S.%fZ"
-            ).date(),
+            date=datetime.datetime.strptime(exp[0], "%Y-%m-%dT%H:%M:%S.%fZ").date(),
             amount=exp[1],
             category=exp[2],
             note=exp[3],

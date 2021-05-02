@@ -47,9 +47,7 @@ def get_filtered_expense_records(
     start_date: datetime.date = None,
 ):
     if _args:
-        raise NotImplementedError(
-            "get_filtered_expense_records() only takes kwargs"
-        )
+        raise NotImplementedError("get_filtered_expense_records() only takes kwargs")
     del _args
     q = far_core.db.ExpenseRecord.query
     if category:
@@ -60,7 +58,9 @@ def get_filtered_expense_records(
         q = q.filter(
             sqlalchemy.or_(
                 far_core.db.ExpenseRecord.category == cat
-                for cat in far_core.EXPENSE_CATEGORY_BY_REDUCED_CATEGORY[reduced_category]
+                for cat in far_core.EXPENSE_CATEGORY_BY_REDUCED_CATEGORY[
+                    reduced_category
+                ]
             )
         )
     if start_date:
@@ -88,9 +88,7 @@ def get_filtered_income_records(
     start_date: datetime.date = None,
 ):
     if _args:
-        raise NotImplementedError(
-            "get_filtered_income_records() only takes kwargs"
-        )
+        raise NotImplementedError("get_filtered_income_records() only takes kwargs")
     del _args
     q = far_core.db.IncomeRecord.query
     if category:
