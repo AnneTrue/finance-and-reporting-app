@@ -31,7 +31,22 @@ class ExpenseRecord(db.Model):
 
     @property
     def pandas_record(self):
-        return self.date, self.amount, self.category, self.account, self.note
+        return (
+            self.expense_id, self.date, self.amount, self.category,
+            self.account, self.note,
+        )
+
+
+def delete_expense_records_by_id(expense_ids: list):
+    try:
+        for expense_id in expense_ids:
+            ExpenseRecord.query.filter(
+                ExpenseRecord.expense_id == expense_id
+            ).delete()
+    except Exception:
+        db.session.rollback()
+        raise
+    db.session.commit()
 
 
 class IncomeRecord(db.Model):
@@ -56,7 +71,22 @@ class IncomeRecord(db.Model):
 
     @property
     def pandas_record(self):
-        return self.date, self.amount, self.category, self.account, self.note
+        return (
+            self.income_id, self.date, self.amount, self.category,
+            self.account, self.note,
+        )
+
+
+def delete_income_records_by_id(income_ids: list):
+    try:
+        for income_id in income_ids:
+            IncomeRecord.query.filter(
+                IncomeRecord.income_id == income_id
+            ).delete()
+    except Exception:
+        db.session.rollback()
+        raise
+    db.session.commit()
 
 
 def init_tables():

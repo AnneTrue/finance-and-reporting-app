@@ -621,7 +621,7 @@ def load_expenses(date_str: str):
     dtable = dash_table.DataTable(
         id="expense_breakdown_table",
         columns=[
-            {"name": col, "id": col} for col in df.columns
+            {"name": col, "id": col} for col in df.columns if col != 'id'
         ],
         data=df.to_dict("records"),
         filter_action="native",
@@ -649,7 +649,7 @@ def load_incomes(date_str: str):
     dtable = dash_table.DataTable(
         id="income_breakdown_table",
         columns=[
-            {"name": col, "id": col} for col in df.columns
+            {"name": col, "id": col} for col in df.columns if col != 'id'
         ],
         data=df.to_dict("records"),
         filter_action="native",

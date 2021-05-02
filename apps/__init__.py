@@ -33,12 +33,12 @@ NAVBAR = dbc.NavbarSimple(
 )
 
 
-@cache.memoize(timeout=15)
+@cache.memoize(timeout=5)
 def get_all_expense_records():
     return far_core.db.ExpenseRecord.query.all()
 
 
-@cache.memoize(timeout=15)
+@cache.memoize(timeout=5)
 def get_filtered_expense_records(
     *_args,
     category: far_core.ExpenseCategory = None,
@@ -71,16 +71,16 @@ def get_filtered_expense_records(
 def dataframe_from_expense_records(expense_record_list: list):
     return pd.DataFrame.from_records(
         data=(exp_rec.pandas_record for exp_rec in expense_record_list),
-        columns=("Date", "Amount", "Category", "Account", "Note"),
+        columns=("id", "Date", "Amount", "Category", "Account", "Note"),
     )
 
 
-@cache.memoize(timeout=15)
+@cache.memoize(timeout=5)
 def get_all_income_records():
     return far_core.db.IncomeRecord.query.all()
 
 
-@cache.memoize(timeout=15)
+@cache.memoize(timeout=5)
 def get_filtered_income_records(
     *_args,
     category: far_core.IncomeCategory = None,
@@ -105,5 +105,5 @@ def get_filtered_income_records(
 def dataframe_from_income_records(income_record_list: list):
     return pd.DataFrame.from_records(
         data=(inc_rec.pandas_record for inc_rec in income_record_list),
-        columns=("Date", "Amount", "Category", "Account", "Note"),
+        columns=("id", "Date", "Amount", "Category", "Account", "Note"),
     )
