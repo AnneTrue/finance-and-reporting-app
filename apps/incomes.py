@@ -30,6 +30,7 @@ def load_incomes(pathname: str):
     if pathname != "/incomes":
         return []
     df = apps.dataframe_from_expense_records(apps.get_all_income_records())
+    df.sort_values(by="Date", ascending=False)
     dtable = dash_table.DataTable(
         id="income_datatable",
         columns=[
@@ -38,6 +39,7 @@ def load_incomes(pathname: str):
         data=df.to_dict("records"),
         filter_action="native",
         sort_action="native",
+        sort_by=[{"column_id": "Date", "direction": "desc"}],
         fixed_rows={"headers": True, "data": 0},
     )
     return dtable

@@ -30,6 +30,7 @@ def load_expenses(pathname):
     if pathname != "/expenses":
         return []
     df = apps.dataframe_from_expense_records(apps.get_all_expense_records())
+    df.sort_values(by="Date", ascending=False)
     dtable = dash_table.DataTable(
         id="expense_datatable",
         columns=[
@@ -38,6 +39,7 @@ def load_expenses(pathname):
         data=df.to_dict("records"),
         filter_action="native",
         sort_action="native",
+        sort_by=[{"column_id": "Date", "direction": "desc"}],
         fixed_rows={"headers": True, "data": 0},
     )
     return dtable

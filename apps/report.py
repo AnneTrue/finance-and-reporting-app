@@ -626,6 +626,7 @@ def load_expenses(date_str: str):
         data=df.to_dict("records"),
         filter_action="native",
         sort_action="native",
+        sort_by=[{"column_id": "Date", "direction": "asc"}],
         fixed_rows={"headers": True, "data": 0},
     )
     return dtable
@@ -635,7 +636,7 @@ def load_expenses(date_str: str):
     Output("income_breakdown_monthly_div", "children"),
     Input("report_date_picker_monthly", "value"),
 )
-def load_expenses(date_str: str):
+def load_incomes(date_str: str):
     end_date = get_date_from_date_str(date_str)
     if not end_date:
         return ["Loading table..."]
@@ -653,6 +654,7 @@ def load_expenses(date_str: str):
         data=df.to_dict("records"),
         filter_action="native",
         sort_action="native",
+        sort_by=[{"column_id": "Date", "direction": "asc"}],
         fixed_rows={"headers": True, "data": 0},
     )
     return dtable
