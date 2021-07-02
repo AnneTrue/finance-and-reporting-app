@@ -58,6 +58,7 @@ LAYOUT = html.Div(
                                 value=2,
                                 type="number",
                                 className="form-control",
+                                disabled=True,
                             ),
                         ],
                         className="form-group",
@@ -75,22 +76,64 @@ LAYOUT = html.Div(
 )
 
 
+def r_squared(actual: pd.Series, fitted: list) -> float:
+    if actual.empty:
+        return 0.0
+    actual_sum = sum(actual)
+    actual_mean = actual_sum / len(actual)
+    ssyy = 0.0
+    sse = 0.0
+    for i in range(len(actual)):
+        diff = actual[i] - actual_mean
+        ssyy += diff ** 2
+        residual = actual[i] - fitted[i]
+        sse += residual ** 2
+    if not ssyy:
+        return 0.0
+    return 1 - (sse / ssyy)
+
+
+def find_best_seasonality_fit(actual: pd.Series) -> int:
+    """Find the best seasonality between 2 months and 12 months."""
+    best_r2 = 0.0
+    best_seasonality = 2
+    for seasonality in range(2, 13):
+        fitted = (
+            statsmodels.tsa.api.ExponentialSmoothing(
+                actual,
+                seasonal_periods=seasonality,
+                trend="add",
+                seasonal="add",
+                initialization_method="estimated",
+            )
+            .fit()
+            .fittedvalues
+        )
+        cur_r2 = r_squared(actual=actual, fitted=fitted)
+        if cur_r2 > best_r2:
+            best_seasonality = seasonality
+            best_r2 = cur_r2
+    return best_seasonality
+
+
 @app.callback(
-    Output("categorical_forecast_graph", "figure"),
+    [
+        Output("categorical_forecast_graph", "figure"),
+        Output("report_seasonality_forecast", "value"),
+    ],
     [
         Input("report_date_picker_forecast", "value"),
         Input("report_category_picker_forecast", "value"),
-        Input("report_seasonality_forecast", "value"),
     ],
 )
-def categorical_forecast_graph(date_str: str, category_str: str, seasonality):
+def categorical_forecast_graph(date_str: str, category_str: str):
     end_date = far_core.get_date_from_date_str(date_str)
-    if not end_date or seasonality > 12 or seasonality < 2:
-        return {"data": []}
+    if not end_date:
+        return {"data": []}, 2
     try:
         category = far_core.ExpenseCategory(category_str)
     except ValueError:
-        return {"data": []}
+        return {"data": []}, 2
     data = []
     months = []
     for month_delta in range(-(12 * 2) - 1, 0):
@@ -109,9 +152,10 @@ def categorical_forecast_graph(date_str: str, category_str: str, seasonality):
             )
         )
     series = pd.Series(data, index=months)
+    best_seasonality = find_best_seasonality_fit(series)
     fit = statsmodels.tsa.api.ExponentialSmoothing(
         series,
-        seasonal_periods=seasonality,
+        seasonal_periods=best_seasonality,
         trend="add",
         seasonal="add",
         initialization_method="estimated",
@@ -122,14 +166,17 @@ def categorical_forecast_graph(date_str: str, category_str: str, seasonality):
     df.columns = ["Actual", "Fitted", "Forecast"]
     df["Fitted"] = df["Fitted"].clip(lower=0.0)
     df["Forecast"] = df["Forecast"].clip(lower=0.0)
-    return px.line(
-        df,
-        x=df.index,
-        y=df.columns,
-        title=f"Forecast for {str(category)}",
-        labels={
-            "index": "Month",
-            "value": "Spending (USD)",
-            "variable": "",
-        },
+    return (
+        px.line(
+            df,
+            x=df.index,
+            y=df.columns,
+            title=f"Forecast for {str(category)}",
+            labels={
+                "index": "Month",
+                "value": "Spending (USD)",
+                "variable": "",
+            },
+        ),
+        best_seasonality,
     )
