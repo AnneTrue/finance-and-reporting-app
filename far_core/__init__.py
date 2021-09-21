@@ -204,7 +204,7 @@ def sum_all_records(records: list) -> decimal.Decimal:
 
 
 def get_date_from_date_str(date_str: str) -> datetime.date:
-    m = re.match(r"(\d{4})-([1-9]|1[0-2]|0[1-9])", date_str)
+    m = re.match(r"(\d{4})-(\d+)", date_str)
     if not m:
         return None
     year, month = int(m.group(1)), int(m.group(2))
