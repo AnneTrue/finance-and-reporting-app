@@ -152,6 +152,7 @@ class IncomeCategory(str, enum.Enum):
     disability = "Disability"
     gift = "Gift"
     interest = "Interest & Dividends"
+    rental_income = "Rental Income"
     wages = "Wages"
     other = "Other"
 
